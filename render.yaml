@@ -1,17 +1,22 @@
 services:
-  - type: private-service
+   type: web
     name: server
     env: node
     runtime:
-      version: "20.16.0"
+      version: '20'
     build:
       command: npm install
     start:
       command: npm run start
     ports:
-      - 3000
+      3000
     envVars:
-      - JWT_SECRET
+       JWT_SECRET: ${JWT_SECRET}
+
     dependencies:
-      - mysql
-      - mysql2
+       mysql
+       mysql2
+
+      static:
+       public
+  
