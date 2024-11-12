@@ -52,7 +52,7 @@ router.post("/emlogin", (req, res) => {
           Email: email,
           id: result[0].id,
         },
-        process.env.JWT_SECRET,
+        "12345",
         { expiresIn: "30d" }
       );
 
