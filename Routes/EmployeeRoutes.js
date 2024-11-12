@@ -5,7 +5,7 @@ import connection from "../utilis/db.js";
 
 const router = express.Router();
 
-router.post("/employee_login", (req, res) => {
+router.post("/emlogin", (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -48,16 +48,16 @@ router.post("/employee_login", (req, res) => {
 
       const token = jwt.sign(
         {
-          role: "employee",
-          email: email,
+          role: "user",
+          Email: email,
           id: result[0].id,
         },
         process.env.JWT_SECRET,
-        { expiresIn: "1d" }
+        { expiresIn: "30d" }
       );
 
       res.cookie("token", token, { httpOnly: true });
-      return res.json({ loginStatus: true, id: result[0].id });
+      res.json({ loginStatus: true, token });
     });
   });
 });
@@ -183,20 +183,20 @@ router.post("/debited", (req, res) => {
   );
 });
 
-router.get("/employee-name/:id", (req, res) => {
-  const id = req.params.id;
+router.get("/employee-name", (req, res) => {
+  const email = req.query.Email;
   const query = "SELECT FirstName, LastName FROM employees WHERE id = ?";
-
-  connection.query(query, [id], (err, results) => {
+  connection.query(query, [email], (err, results) => {
     if (err) {
       console.error("error running query:", err);
       res.status(500).send({ message: "Error fetching employee name" });
     } else if (!results.length) {
       res.status(404).send({ message: "Employee not found" });
     } else {
-      res.send({
-        FirstName: results[0].FirstName,
-        LastName: results[0].LastName,
+      const employeeName = results[0];
+      res.status(200).send({
+        FirstName: employeeName.FirstName,
+        LastName: employeeName.LastName,
       });
     }
   });
