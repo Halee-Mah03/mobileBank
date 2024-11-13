@@ -10,6 +10,7 @@ import cookieParser from "cookie-parser";
 dotenv.config();
 
 const app = express();
+const port = process.env.PORT || 3000;
 app.use(
   cors({
     origin: ["http://localhost:5173"],
@@ -34,6 +35,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ Status: false, Error: "Internal Server Error" });
 });
 
-app.listen(3000, () => {
-  console.log("server is running");
+app.listen(port, () => {
+  console.log(`server is listening on port ${port}`);
 });
