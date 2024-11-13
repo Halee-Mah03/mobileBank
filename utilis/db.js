@@ -9,24 +9,43 @@ const dbConfig = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+  connectTimeout: 30000,
 };
 
 const connection = mysql.createConnection(dbConfig);
 
-connection.connect((err) => {
-  if (err) {
-    console.log("connection error:", err.message);
-  } else {
-    console.log("Connected");
-  }
-});
+let retryCount = 0;
+const maxRetries = 5;
+const retryDelay = 5000;
 
+const connectWithRetry = () => {
+  connection.connect((err) => {
+    if (err && err.code === "ETIMEDOUT") {
+      if (retryCount < maxRetries) {
+        retryCount++;
+        console.log(
+          `Connection timeout. Retrying (${retryCount}/${maxRetries})...`
+        );
+        setTimeout(connectWithRetry, retryDelay);
+      } else {
+        console.log("Maximum retries exceeded. Connection failed.");
+      }
+    } else if (err) {
+      console.log("Connection error:", err.message);
+    } else {
+      console.log("Connected");
+      retryCount = 0;
+    }
+  });
+};
 connection.on("error", (err) => {
-  console.log("database error:", err.message);
+  console.log("Database error:", err.message);
 });
 
 connection.on("close", () => {
-  console.log("database connection closed");
+  console.log("Database connection closed");
 });
+
+connectWithRetry();
 
 export default connection;
